@@ -1,4 +1,4 @@
-package project;
+package org.graph.project;
 
 import javax.swing.*;
 import java.awt.*;

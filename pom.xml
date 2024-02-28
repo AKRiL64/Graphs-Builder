@@ -22,7 +22,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>org.example.Main</mainClass>
+                            <mainClass>org.graph.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

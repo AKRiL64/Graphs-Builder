@@ -1,6 +1,6 @@
-package org.example;
+package org.graph;
 
-import project.MainWindow;
+import org.graph.project.MainWindow;
 
 import javax.swing.*;
 

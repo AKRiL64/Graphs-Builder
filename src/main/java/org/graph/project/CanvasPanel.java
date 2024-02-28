@@ -1,4 +1,4 @@
-package project;
+package org.graph.project;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,7 +6,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
-import static project.Utils.*;
+import static org.graph.project.Utils.*;
 
 public class CanvasPanel extends JPanel implements MouseListener{
     private final ArrayList<Peak> peaks;
