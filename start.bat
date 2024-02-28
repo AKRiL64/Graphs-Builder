@@ -1,0 +1,1 @@
+C:\Users\lerro\.jdks\corretto-17.0.10\bin\java.exe -jar D:\JavaWorkspace\PNL145\MainTask\Graphs-Stepanok\target\Graphs-Stepanok-1.0-SNAPSHOT.jar
