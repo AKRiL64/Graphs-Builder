@@ -8,7 +8,7 @@ public class Peak {
     private boolean isSelected;
     public Peak(Point center) {
         this.center = center;
-        this.radius = 15;
+        this.radius = 20;
         this.isSelected = false;
     }
 
