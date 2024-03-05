@@ -147,7 +147,7 @@ public class DialogMenuButtonsPanel extends JPanel {
                 FileNameExtensionFilter filter = new FileNameExtensionFilter(
                         "TXT files", "txt");
                 fileChooser.setFileFilter(filter);
-                int option = fileChooser.showOpenDialog(new DialogMenu());
+                int option = fileChooser.showSaveDialog(new DialogMenu());
                 if(option == JFileChooser.APPROVE_OPTION){
                     currentFile = fileChooser.getSelectedFile();
                     PrintWriter writer;
