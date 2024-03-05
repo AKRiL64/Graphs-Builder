@@ -4,6 +4,9 @@ public class Edge {
     private Peak peakOne;
     private Peak peakTwo;
 
+    public Edge() {
+    }
+
     public Edge(Peak peakOne, Peak peakTwo) {
         this.peakOne = peakOne;
         this.peakTwo = peakTwo;

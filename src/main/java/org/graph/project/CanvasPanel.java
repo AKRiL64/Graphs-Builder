@@ -10,8 +10,8 @@ import static org.graph.project.Utils.*;
 
 
 public class CanvasPanel extends JPanel implements MouseListener{
-    private final ArrayList<Peak> peaks;
-    private final ArrayList<Edge> edges;
+    public final ArrayList<Peak> peaks;
+    public final ArrayList<Edge> edges;
 
     private boolean isThereSelectedPeak;
     private int selectedPeakNumber;
@@ -22,7 +22,7 @@ public class CanvasPanel extends JPanel implements MouseListener{
         this.addMouseListener(this);
     }
 
-    //Generating a new image on screen
+    //Generating a new image frame on screen
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -36,7 +36,6 @@ public class CanvasPanel extends JPanel implements MouseListener{
             g2.drawLine(edge.getPeakOne().getCenter().x, edge.getPeakOne().getCenter().y,
                     edge.getPeakTwo().getCenter().x, edge.getPeakTwo().getCenter().y);
         }
-
         for (int i = 0;i < peaks.size(); i++){
             Point p = peaks.get(i).getCenter();
             int radius = peaks.get(i).getRadius();
@@ -75,7 +74,9 @@ public class CanvasPanel extends JPanel implements MouseListener{
                     else {
                         isThereSelectedPeak = false;
                         peaks.get(selectedPeakNumber).setSelected(false);
-                        edges.add(new Edge(peaks.get(selectedPeakNumber), peaks.get(i)));
+                        if (isThereNoAbsEqualEdge(edges, peaks, selectedPeakNumber, i)){
+                            edges.add(new Edge(peaks.get(selectedPeakNumber), peaks.get(i)));
+                        }
                     }
                 }
             }
@@ -88,11 +89,10 @@ public class CanvasPanel extends JPanel implements MouseListener{
                 peaks.get(selectedPeakNumber).setSelected(false);
                 isThereSelectedPeak = false;
             }
-            //System.out.println(edges);
         }
         //checking rmb
         else if (e.getButton() == MouseEvent.BUTTON3){
-            if (peaks.size()>0){
+            if (!peaks.isEmpty()){
                 peaks.get(selectedPeakNumber).setSelected(false);
             }
             isThereSelectedPeak = false;

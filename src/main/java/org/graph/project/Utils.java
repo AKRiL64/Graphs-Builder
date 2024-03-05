@@ -3,6 +3,7 @@ package org.graph.project;
 import org.graph.project.dto.Point2D;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 import static java.lang.Math.*;
 
@@ -57,5 +58,10 @@ public class Utils {
             return true;
         }
 
+    }
+    public static boolean isThereNoAbsEqualEdge (ArrayList<Edge> edges, ArrayList<Peak> peaks, int firstIndex, int secondIndex){
+        return edges.stream()
+                .noneMatch(s -> (s.getPeakOne()==peaks.get(firstIndex)||s.getPeakOne()==peaks.get(secondIndex))&&
+                        (s.getPeakTwo()==peaks.get(firstIndex)||s.getPeakTwo()==peaks.get(secondIndex)));
     }
 }

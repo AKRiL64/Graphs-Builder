@@ -6,6 +6,10 @@ public class Peak {
     private int radius;
     private Point center;
     private boolean isSelected;
+
+    public Peak() {
+    }
+
     public Peak(Point center) {
         this.center = center;
         this.radius = 20;
