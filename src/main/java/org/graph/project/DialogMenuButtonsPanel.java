@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DialogMenuButtonsPanel extends JPanel {
     JButton buttonOpen = new JButton("Open");
@@ -49,12 +51,8 @@ public class DialogMenuButtonsPanel extends JPanel {
                         throw new RuntimeException(ex);
                     }
                     BufferedReader bufferedReader = new BufferedReader(fileReader);
-                    if (!canvasPanel.peaks.isEmpty()) {
-                        canvasPanel.peaks.subList(0, canvasPanel.peaks.size()).clear();
-                    }
-                    if (!canvasPanel.edges.isEmpty()) {
-                        canvasPanel.edges.subList(0, canvasPanel.edges.size()).clear();
-                    }
+                    canvasPanel.edgesHashMap.clear();
+                    canvasPanel.currentNumberOfPeaks=0;
                     try {
                         char[] c = new char[1];
                         int pointer = 1;
@@ -76,7 +74,9 @@ public class DialogMenuButtonsPanel extends JPanel {
                                         break;
                                     }
                                     case 2:{
-                                        canvasPanel.peaks.add(new Peak(new Point(x, Integer.parseInt(line.toString()))));
+                                        canvasPanel.currentNumberOfPeaks++;
+                                        canvasPanel.edgesHashMap.put(new Peak(new Point(x, Integer.parseInt(line.toString())),
+                                                canvasPanel.currentNumberOfPeaks), new Edge());
                                         pointer = 3;
                                         break;
                                     }
@@ -114,15 +114,24 @@ public class DialogMenuButtonsPanel extends JPanel {
                                     case 4:{
                                         y1 = Integer.parseInt(line.toString());
                                         Edge edge = new Edge();
-                                        for (Peak peak: canvasPanel.peaks){
-                                            if (peak.getCenter().x == x && peak.getCenter().y == y){
-                                                edge.setPeakOne(peak);
+                                        int finalX = x;
+                                        int finalY = y;
+                                        Peak tFirstPeak = null;
+                                        Peak tSecondPeak = null;
+                                        int finalX1 = x1;
+                                        int finalY1 = y1;
+                                        for (Map.Entry<Peak, Edge> entry : canvasPanel.edgesHashMap.entrySet()) {
+                                            Peak key = entry.getKey();
+                                            Edge value = entry.getValue();
+                                            if (key.getCenter().x == finalX && key.getCenter().y == finalY) {
+                                                tFirstPeak = key;
                                             }
-                                            if (peak.getCenter().x == x1 && peak.getCenter().y ==y1){
-                                                edge.setPeakTwo(peak);
+                                            if (key.getCenter().x == finalX1 && key.getCenter().y == finalY1) {
+                                                tSecondPeak = key;
                                             }
                                         }
-                                        canvasPanel.edges.add(edge);
+                                        canvasPanel.edgesHashMap.get(tFirstPeak).addPeak(tSecondPeak);
+                                        canvasPanel.edgesHashMap.get(tSecondPeak).addPeak(tSecondPeak);
                                         pointer = 1;
                                         break;
                                     }
@@ -156,19 +165,31 @@ public class DialogMenuButtonsPanel extends JPanel {
                     } catch (FileNotFoundException ex) {
                         throw new RuntimeException(ex);
                     }
-                    for (Peak peak: canvasPanel.peaks){
-                        writer.print(peak.getCenter().x + " "
-                                + peak.getCenter().y + " "
-                                        + peak.getRadius() + " ");
-                    }
-                    writer.print("}");
-                    for (Edge edge: canvasPanel.edges){
-                        writer.print(edge.getPeakOne().getCenter().x + " "
-                                + edge.getPeakOne().getCenter().y + " "
-                                + edge.getPeakTwo().getCenter().x + " "
-                                +edge.getPeakTwo().getCenter().y + " ");
-                    }
-                    writer.print("}");
+                      canvasPanel.edgesHashMap.forEach((key,value)->{
+                          writer.print(key.getCenter().x + " "
+                                  +key.getCenter().y + " "
+                                          + key.getRadius() + " ");
+                      });
+                      writer.print("}");
+                      canvasPanel.edgesHashMap.forEach((key, value)->{
+                          value.getConnectedPeaks().forEach((valuePrint)->{
+                              writer.print(key.getCenter().x + " " + key.getCenter().y + " "
+                                      + valuePrint.getCenter().x + " " + valuePrint.getCenter().y + " ");
+                          });
+                      });
+                      writer.print("}");
+//                    for (Peak peak: canvasPanel.peaks){
+//                        writer.print(peak.getCenter().x + " "
+//                                + peak.getCenter().y + " "
+//                                        + peak.getRadius() + " ");
+//                    }
+//
+//                    for (Edge edge: canvasPanel.edges){
+//                        writer.print(edge.getPeakOne().getCenter().x + " "
+//                                + edge.getPeakOne().getCenter().y + " "
+//                                + edge.getPeakTwo().getCenter().x + " "
+//                                +edge.getPeakTwo().getCenter().y + " ");
+//                    }
                     writer.close();
                 }
             }

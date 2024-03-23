@@ -3,15 +3,21 @@ package org.graph.project;
 import java.awt.*;
 
 public class Peak {
+    //base
     private int radius;
     private Point center;
+    private int id;
+    //for
     private boolean isSelected;
+    //for dfs
+    private boolean isUsed;
 
     public Peak() {
     }
 
-    public Peak(Point center) {
+    public Peak(Point center, int id) {
         this.center = center;
+        this.id = id;
         this.radius = 20;
         this.isSelected = false;
     }
@@ -36,5 +42,17 @@ public class Peak {
 
     public void setSelected(boolean selected) {
         isSelected = selected;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void incId() {
+        this.id++;
+    }
+
+    public void decId(){
+        this.id--;
     }
 }

@@ -1,19 +1,35 @@
 package org.graph.project;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+
 public class Edge {
-    private Peak peakOne;
-    private Peak peakTwo;
-
+    private HashSet<Peak> connectedPeaks;
+    private String Type;
     public Edge() {
+        connectedPeaks = new HashSet<>();
     }
 
-    public Edge(Peak peakOne, Peak peakTwo) {
-        this.peakOne = peakOne;
-        this.peakTwo = peakTwo;
+    public Edge(Peak peak) {
+        connectedPeaks = new HashSet<>();
+        connectedPeaks.add(peak);
     }
 
-    public Peak getPeakOne() {return peakOne;}
-    public void setPeakOne(Peak peakOne) {this.peakOne = peakOne;}
-    public Peak getPeakTwo() {return peakTwo;}
-    public void setPeakTwo(Peak peakTwo) {this.peakTwo = peakTwo;}
+    public HashSet<Peak> getConnectedPeaks() {
+        return connectedPeaks;
+    }
+
+    public void addPeak(Peak peak) {
+        this.connectedPeaks.add(peak);
+    }
+
+    public String getType() {
+        return Type;
+    }
+
+    public void setType(String type) {
+        Type = type;
+    }
 }
