@@ -10,7 +10,7 @@ public class Peak {
     //for
     private boolean isSelected;
     //for dfs
-    private boolean isUsed;
+    private int dfsCounter;
 
     public Peak() {
     }
@@ -20,6 +20,15 @@ public class Peak {
         this.id = id;
         this.radius = 20;
         this.isSelected = false;
+        this.dfsCounter=0;
+    }
+
+    public int getDfsCounter() {
+        return dfsCounter;
+    }
+
+    public void setDfsCounter(int dfsCounter) {
+        this.dfsCounter = dfsCounter;
     }
 
     public int getRadius() {

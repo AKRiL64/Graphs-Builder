@@ -7,12 +7,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class DialogMenuButtonsPanel extends JPanel {
     JButton buttonOpen = new JButton("Open");
     JButton buttonSave = new JButton("Save");
     JButton buttonClose = new JButton("Exit");
+    JButton buttonDFS = new JButton("DFS");
     File currentFile;
     CanvasPanel canvasPanel;
     public DialogMenuButtonsPanel(CanvasPanel canvasPanel) {
@@ -30,10 +30,43 @@ public class DialogMenuButtonsPanel extends JPanel {
         buttonSave.setBounds(0,25, 100,25);
         add(buttonClose);
         buttonClose.setBounds(0,50, 100,25);
+        add(buttonDFS);
+        buttonDFS.setBounds(100,0,60,25);
+        buttonDFS.setBackground(Color.LIGHT_GRAY);
         buttonOpen.setBackground(Color.LIGHT_GRAY);
         buttonSave.setBackground(Color.LIGHT_GRAY);
         buttonClose.setBackground(Color.LIGHT_GRAY);
 
+        buttonDFS.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!canvasPanel.dfsAnimationStarted) {
+                    if (canvasPanel.isThereSelectedPeak) {
+                        canvasPanel.dfsAnimationStarted = true;
+                        Thread animationDFS = new Thread(() -> {
+                            try {
+                                canvasPanel.startingDfsPeak = canvasPanel.selectedPeak;
+                                canvasPanel.dfsAnimation(canvasPanel.startingDfsPeak);
+                            } catch (InterruptedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
+                        animationDFS.start();
+                    } else if (canvasPanel.currentNumberOfPeaks != 0) {
+                        canvasPanel.dfsAnimationStarted = true;
+                        Thread animationDFS = new Thread(() -> {
+                            try {
+                                canvasPanel.startingDfsPeak = (Peak) canvasPanel.edgesHashMap.keySet().toArray()[0];
+                                canvasPanel.dfsAnimation(canvasPanel.startingDfsPeak);
+                            } catch (InterruptedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
+                        animationDFS.start();
+                    }
+                }
+            }
+        });
         buttonOpen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
