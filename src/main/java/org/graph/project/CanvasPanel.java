@@ -10,6 +10,7 @@ import static java.lang.Thread.sleep;
 import static org.graph.project.Utils.*;
 import java.awt.Font;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 
@@ -21,7 +22,7 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
     public Peak startingDfsPeak;
     public boolean isThereSelectedPeak;
     private boolean movingModeOn = false;
-    public boolean dfsAnimationStarted = false;
+    public boolean animationStarted = false;
     public Peak selectedPeak;
     private int counter;
 
@@ -29,6 +30,8 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
         edgesHashMap = new HashMap<>();
         this.addMouseListener(this);
         this.addKeyListener(this);
+        this.setFocusable(true);
+        this.requestFocusInWindow();
     }
 
     //Generating a new image frame on screen
@@ -50,7 +53,7 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
         edgesHashMap.forEach((key, value)-> {
             Point p = key.getCenter();
             int radius = key.getRadius();
-            if (!dfsAnimationStarted) {
+            if (!animationStarted) {
                 if (key.getSelected()) {
                     g2.setColor(Color.CYAN);
                 } else {
@@ -94,6 +97,38 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
         });
     }
 
+    public void bfsAnimation(HashSet<Peak> curBfsPeaks) throws InterruptedException {
+        HashSet<Peak> nextBfsPeaks = new HashSet<>();
+        curBfsPeaks.forEach((p)->{
+            p.setDfsCounter(2);
+            edgesHashMap.get(p).getConnectedPeaks().forEach((value)->{
+                if (value.getDfsCounter()==0){
+                    System.out.println("peak.." + value.getId());
+                    nextBfsPeaks.add(value);
+                    value.setDfsCounter(1);
+                }
+            });
+        });
+        repaint();
+        sleep(2000);
+        curBfsPeaks.forEach((p)->{
+            p.setDfsCounter(2);
+        });
+        repaint();
+        if (!nextBfsPeaks.isEmpty()){
+            System.out.println("next step");
+            bfsAnimation(nextBfsPeaks);
+        }
+        else {
+            System.out.println("end");
+            repaint();
+            animationStarted=false;
+            edgesHashMap.forEach((key, value)->{
+                key.setDfsCounter(0);
+            });
+            repaint();
+        }
+    }
     public void dfsAnimation(Peak peak) throws InterruptedException {
         peak.setDfsCounter(1);
         repaint();
@@ -115,7 +150,7 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
             edgesHashMap.forEach((key, value)-> {
                 key.setDfsCounter(0);
             });
-            dfsAnimationStarted = false;
+            animationStarted = false;
             repaint();
         }
     }
@@ -126,7 +161,7 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (e.getButton() == MouseEvent.BUTTON2 && !dfsAnimationStarted) {
+        if (e.getButton() == MouseEvent.BUTTON2 && !animationStarted) {
             edgesHashMap.forEach((key, value)->{
                 if (!isDistanceBetweenPointsBiggerThan(e.getPoint(),
                         key.getCenter(),key.getRadius())){
@@ -146,7 +181,7 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
     @Override
     public void mouseReleased(MouseEvent e) {
         // Checking lmb
-        if (!dfsAnimationStarted) {
+        if (!animationStarted) {
             if (cursorActionState == CursorActionState.ADDING_AND_DELETING) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     edgesHashMap.forEach((key, value) -> {

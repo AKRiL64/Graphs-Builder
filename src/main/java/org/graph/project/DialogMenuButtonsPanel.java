@@ -6,6 +6,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class DialogMenuButtonsPanel extends JPanel {
@@ -13,10 +15,11 @@ public class DialogMenuButtonsPanel extends JPanel {
     JButton buttonSave = new JButton("Save");
     JButton buttonClose = new JButton("Exit");
     JButton buttonDFS = new JButton("DFS");
+    JButton buttonBFS = new JButton("BFS");
     File currentFile;
     CanvasPanel canvasPanel;
     public DialogMenuButtonsPanel(CanvasPanel canvasPanel) {
-        setSize(150, 75);
+        setSize(200, 75);
         setVisible(true);
         setLayout(null);
         this.canvasPanel=canvasPanel;
@@ -31,18 +34,45 @@ public class DialogMenuButtonsPanel extends JPanel {
         add(buttonClose);
         buttonClose.setBounds(0,50, 100,25);
         add(buttonDFS);
-        buttonDFS.setBounds(100,0,60,25);
+        buttonDFS.setBounds(100,0,100,25);
+        add(buttonBFS);
+        buttonBFS.setBounds(100,25, 100,25);
+        buttonBFS.setBackground(Color.LIGHT_GRAY);
         buttonDFS.setBackground(Color.LIGHT_GRAY);
         buttonOpen.setBackground(Color.LIGHT_GRAY);
         buttonSave.setBackground(Color.LIGHT_GRAY);
         buttonClose.setBackground(Color.LIGHT_GRAY);
 
+        buttonBFS.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!canvasPanel.animationStarted) {
+                    System.out.println("hereButton");
+                    Thread animationBFS = new Thread(() -> {
+                        canvasPanel.animationStarted=true;
+                        HashSet<Peak> firstPeak= new HashSet<>();
+                        if (canvasPanel.isThereSelectedPeak) {
+                            firstPeak.add(canvasPanel.selectedPeak);
+                        }
+                        else{
+                            firstPeak.add((Peak) canvasPanel.edgesHashMap.keySet().toArray()[0]);
+                        }
+                        try {
+                            canvasPanel.bfsAnimation(firstPeak);
+                        } catch (InterruptedException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                    });
+                    animationBFS.start();
+                }
+            }
+        });
         buttonDFS.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!canvasPanel.dfsAnimationStarted) {
+                if (!canvasPanel.animationStarted) {
                     if (canvasPanel.isThereSelectedPeak) {
-                        canvasPanel.dfsAnimationStarted = true;
+                        canvasPanel.animationStarted = true;
                         Thread animationDFS = new Thread(() -> {
                             try {
                                 canvasPanel.startingDfsPeak = canvasPanel.selectedPeak;
@@ -53,7 +83,7 @@ public class DialogMenuButtonsPanel extends JPanel {
                         });
                         animationDFS.start();
                     } else if (canvasPanel.currentNumberOfPeaks != 0) {
-                        canvasPanel.dfsAnimationStarted = true;
+                        canvasPanel.animationStarted = true;
                         Thread animationDFS = new Thread(() -> {
                             try {
                                 canvasPanel.startingDfsPeak = (Peak) canvasPanel.edgesHashMap.keySet().toArray()[0];
@@ -70,6 +100,7 @@ public class DialogMenuButtonsPanel extends JPanel {
         buttonOpen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                canvasPanel.isThereSelectedPeak = false;
                 JFileChooser fileChooser = new JFileChooser();
                 FileNameExtensionFilter filter = new FileNameExtensionFilter(
                         "TXT files", "txt");
