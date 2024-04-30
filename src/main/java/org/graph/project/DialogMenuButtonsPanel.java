@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -16,10 +15,12 @@ public class DialogMenuButtonsPanel extends JPanel {
     JButton buttonClose = new JButton("Exit");
     JButton buttonDFS = new JButton("DFS");
     JButton buttonBFS = new JButton("BFS");
+    JButton buttonSearch = new JButton("Search");
+    JLabel textPanel = new JLabel("Waiting to do smth (*^▽^*)");
     File currentFile;
     CanvasPanel canvasPanel;
     public DialogMenuButtonsPanel(CanvasPanel canvasPanel) {
-        setSize(200, 75);
+        setSize(200, 100);
         setVisible(true);
         setLayout(null);
         this.canvasPanel=canvasPanel;
@@ -37,17 +38,34 @@ public class DialogMenuButtonsPanel extends JPanel {
         buttonDFS.setBounds(100,0,100,25);
         add(buttonBFS);
         buttonBFS.setBounds(100,25, 100,25);
+        add(buttonSearch);
+        buttonSearch.setBounds(100,50, 100,25);
+        add(textPanel);
+        textPanel.setBounds(0,75,200,25);
+        canvasPanel.textPanel =textPanel;
+        textPanel.setBackground(Color.LIGHT_GRAY);
+        buttonSearch.setBackground(Color.LIGHT_GRAY);
         buttonBFS.setBackground(Color.LIGHT_GRAY);
         buttonDFS.setBackground(Color.LIGHT_GRAY);
         buttonOpen.setBackground(Color.LIGHT_GRAY);
         buttonSave.setBackground(Color.LIGHT_GRAY);
         buttonClose.setBackground(Color.LIGHT_GRAY);
 
+        buttonSearch.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(!canvasPanel.animationStarted){
+                    textPanel.setText("Select vertex 1 ╰(ಠ_ಠ )¬");
+                    canvasPanel.animationStarted = true;
+                    canvasPanel.searchSelectMode = true;
+                    canvasPanel.curSearchPeak = 1;
+                }
+            }
+        });
         buttonBFS.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!canvasPanel.animationStarted) {
-                    System.out.println("hereButton");
                     Thread animationBFS = new Thread(() -> {
                         canvasPanel.animationStarted=true;
                         HashSet<Peak> firstPeak= new HashSet<>();
@@ -58,6 +76,8 @@ public class DialogMenuButtonsPanel extends JPanel {
                             firstPeak.add((Peak) canvasPanel.edgesHashMap.keySet().toArray()[0]);
                         }
                         try {
+                            canvasPanel.buttonSelected = buttonBFS;
+                            canvasPanel.currentNumberOfAnimationPeaks = 1;
                             canvasPanel.bfsAnimation(firstPeak);
                         } catch (InterruptedException ex) {
                             throw new RuntimeException(ex);
@@ -71,6 +91,8 @@ public class DialogMenuButtonsPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!canvasPanel.animationStarted) {
+                    canvasPanel.buttonSelected=buttonDFS;
+                    canvasPanel.currentNumberOfAnimationPeaks=0;
                     if (canvasPanel.isThereSelectedPeak) {
                         canvasPanel.animationStarted = true;
                         Thread animationDFS = new Thread(() -> {

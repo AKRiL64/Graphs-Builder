@@ -1,5 +1,6 @@
 package org.graph.project;
 
+import com.sun.source.tree.WhileLoopTree;
 import org.graph.project.enums.CursorActionState;
 
 import javax.swing.*;
@@ -20,12 +21,20 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
     public int currentNumberOfPeaks = 0;
     private Peak selectedMovingPeak;
     public Peak startingDfsPeak;
+    public JLabel textPanel;
     public boolean isThereSelectedPeak;
+    public HashMap<Peak,Peak> bfsPeakWaysPairs = new HashMap<>();
     private boolean movingModeOn = false;
     public boolean animationStarted = false;
+    public boolean searchSelectMode = false;
+    public int curSearchPeak;
+    private Peak startingSearchPeak;
+    private Peak peakToFind;
+    public int currentNumberOfAnimationPeaks = 0;
     public Peak selectedPeak;
+    private boolean endSearch;
     private int counter;
-
+    public JButton buttonSelected;
     public CanvasPanel() {
         edgesHashMap = new HashMap<>();
         this.addMouseListener(this);
@@ -103,25 +112,31 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
             p.setDfsCounter(2);
             edgesHashMap.get(p).getConnectedPeaks().forEach((value)->{
                 if (value.getDfsCounter()==0){
-                    System.out.println("peak.." + value.getId());
                     nextBfsPeaks.add(value);
                     value.setDfsCounter(1);
+                    currentNumberOfAnimationPeaks++;
                 }
             });
         });
         repaint();
-        sleep(2000);
+        sleep(1000);
         curBfsPeaks.forEach((p)->{
             p.setDfsCounter(2);
         });
         repaint();
         if (!nextBfsPeaks.isEmpty()){
-            System.out.println("next step");
             bfsAnimation(nextBfsPeaks);
         }
         else {
-            System.out.println("end");
             repaint();
+            if (currentNumberOfAnimationPeaks ==currentNumberOfPeaks){
+                textPanel.setText("CONNECTED (✿◡‿◡)");
+            }
+            else{
+                textPanel.setText("NOT CONNECTED (っ °Д °;)っ");
+            }
+            sleep(4000);
+            textPanel.setText("Waiting to do smth (*^▽^*)");
             animationStarted=false;
             edgesHashMap.forEach((key, value)->{
                 key.setDfsCounter(0);
@@ -129,8 +144,62 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
             repaint();
         }
     }
+
+    private void bfsSearchAnimation(HashSet<Peak> curBfsPeaks) throws InterruptedException {
+        HashSet<Peak> nextBfsPeaks = new HashSet<>();
+        curBfsPeaks.forEach((p) -> {
+            p.setDfsCounter(2);
+            edgesHashMap.get(p).getConnectedPeaks().forEach((value) -> {
+                if (value.getDfsCounter() == 0) {
+                    bfsPeakWaysPairs.put(value,p);
+                    nextBfsPeaks.add(value);
+                    value.setDfsCounter(1);
+                    currentNumberOfAnimationPeaks++;
+                    if (value == peakToFind){
+                        endSearch=true;
+                    }
+                }
+            });
+        });
+        repaint();
+        sleep(1000);
+        curBfsPeaks.forEach((p) -> {
+            p.setDfsCounter(2);
+        });
+        repaint();
+        if (!nextBfsPeaks.isEmpty() && !endSearch) {
+            bfsSearchAnimation(nextBfsPeaks);
+        } else {
+            if (nextBfsPeaks.isEmpty() && !endSearch){
+                textPanel.setText("No ways to the destination ⊙﹏⊙∥");
+            }
+            else{
+                String tString = new String("");
+                Peak key = bfsPeakWaysPairs.get(peakToFind);
+                tString = tString+String.valueOf(peakToFind.getId());
+
+                while (key!=bfsPeakWaysPairs.get(key)){
+                    System.out.println(key.getId());
+                    tString = String.valueOf(key.getId())+"-"+tString;
+                    key = bfsPeakWaysPairs.get(key);
+                }
+
+                tString = String.valueOf(key.getId())+"-"+tString;
+                textPanel.setText(tString);
+            }
+            repaint();
+            sleep(4000);
+            textPanel.setText("Waiting to do smth (*^▽^*)");
+            animationStarted = false;
+            edgesHashMap.forEach((key, value) -> {
+                key.setDfsCounter(0);
+            });
+            repaint();
+        }
+    }
     public void dfsAnimation(Peak peak) throws InterruptedException {
         peak.setDfsCounter(1);
+        currentNumberOfAnimationPeaks++;
         repaint();
         edgesHashMap.get(peak).getConnectedPeaks().forEach((value)->{
             if (value.getDfsCounter()==0) {
@@ -146,7 +215,14 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
         peak.setDfsCounter(2);
         repaint();
         if (peak == startingDfsPeak){
-            sleep(1000);
+            if (currentNumberOfAnimationPeaks==currentNumberOfPeaks){
+                textPanel.setText("CONNECTED (✿◡‿◡)");
+            }
+            else{
+                textPanel.setText("NOT CONNECTED (っ °Д °;)っ");
+            }
+            sleep(4000);
+            textPanel.setText("Waiting to do smth (*^▽^*)");
             edgesHashMap.forEach((key, value)-> {
                 key.setDfsCounter(0);
             });
@@ -261,6 +337,47 @@ public class CanvasPanel extends JPanel implements MouseListener, KeyListener {
             }
             repaint();
         }
+        else if (searchSelectMode){
+            for (Map.Entry<Peak, Edge> entry : edgesHashMap.entrySet()) {
+                Peak key = entry.getKey();
+                Edge value = entry.getValue();
+                if (!isDistanceBetweenPointsBiggerThan(e.getPoint(),
+                        key.getCenter(), key.getRadius())) {
+                    if (curSearchPeak==1){
+                        startingSearchPeak=key;
+                        System.out.println(startingSearchPeak);
+                        curSearchPeak++;
+                        textPanel.setText("Select vertex 2 ┌( ಠ_ಠ)┘");
+                    }
+                    else{
+                        textPanel.setText("Calculating.. φ(゜▽゜*)♪");
+                        Thread animSearch = new Thread(()->{
+                            try {
+                                endSearch=false;
+                                peakToFind=key;
+                                searchSelectMode=false;
+                                if (bfsPeakWaysPairs != null){
+                                    bfsPeakWaysPairs.clear();
+                                }
+                                bfsPeakWaysPairs.put(startingSearchPeak,startingSearchPeak);
+                                HashSet<Peak> tPeakSet = new HashSet<Peak>();
+                                System.out.println(tPeakSet);
+                                tPeakSet.add(startingSearchPeak);
+                                System.out.println(tPeakSet);
+                                if (peakToFind==startingSearchPeak){
+                                    endSearch=true;
+                                }
+                                bfsSearchAnimation(tPeakSet);
+                            } catch (InterruptedException ex) {
+                                throw new RuntimeException(ex);
+                            }
+                        });
+                        animSearch.start();
+                    }
+                }
+            }
+        }
+
     }
 
     @Override
